@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "dgSpecHash": "nIXWJzlQVZGrQViwUeukCn4pNuDslPRb/37qWoyKhTD0ScwFGJB/vhCzC+DU9kzaxy3RypdqLV+K58TPnjZwXw==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\ioannisb\\Documents\\Development\\API_Client\\API_Client\\API_Client.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\ioannisb\\.nuget\\packages\\microsoft.net.illink.tasks\\8.0.6\\microsoft.net.illink.tasks.8.0.6.nupkg.sha512",
+    "C:\\Users\\ioannisb\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
+    "C:\\Users\\ioannisb\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\8.0.6\\microsoft.netcore.app.runtime.win-x64.8.0.6.nupkg.sha512",
+    "C:\\Users\\ioannisb\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\8.0.6\\microsoft.windowsdesktop.app.runtime.win-x64.8.0.6.nupkg.sha512",
+    "C:\\Users\\ioannisb\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\8.0.6\\microsoft.aspnetcore.app.runtime.win-x64.8.0.6.nupkg.sha512"
+  ],
+  "logs": []
+}

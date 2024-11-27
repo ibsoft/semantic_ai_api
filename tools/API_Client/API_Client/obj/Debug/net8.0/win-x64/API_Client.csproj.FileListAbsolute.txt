@@ -1,0 +1,4 @@
+C:\Users\ioabuh.UNIXFOR\source\repos\API_Client\API_Client\obj\Debug\net8.0\win-x64\API_Client.csproj.AssemblyReference.cache
+C:\Users\ioabuh.UNIXFOR\source\repos\API_Client\API_Client\obj\Debug\net8.0\win-x64\API_Client.Form1.resources
+C:\Users\ioabuh.UNIXFOR\source\repos\API_Client\API_Client\obj\Debug\net8.0\win-x64\API_Client.Properties.Resources.resources
+C:\Users\ioabuh.UNIXFOR\source\repos\API_Client\API_Client\obj\Debug\net8.0\win-x64\API_Client.csproj.GenerateResource.cache
