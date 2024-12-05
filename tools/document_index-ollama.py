@@ -31,9 +31,11 @@ def create_index():
     index_mapping = {
         "mappings": {
             "properties": {
+                "Title": {"type": "text"},
                 "Description": {"type": "text"},
                 "Category": {"type": "keyword"},
                 "Sub-Category": {"type": "keyword"},
+                "Sub-Sub-Category": {"type": "keyword"},
                 "embedding": {
                     "type": "dense_vector",
                     "dims": 768  # Replace with correct dimensions
@@ -42,32 +44,36 @@ def create_index():
         }
     }
     # Delete index if it exists
-    es.indices.delete(index="documents", ignore=[400, 404])
-    es.indices.create(index="documents", body=index_mapping, ignore=400)
+    es.indices.delete(index="categories_index", ignore=[400, 404])
+    es.indices.create(index="categories_index", body=index_mapping, ignore=400)
 
 
 def index_documents(data):
     for i, doc in enumerate(data["dataset"]):
+        title = doc["Title"]
         description = doc["Description"]
         category = doc["Category"]
         sub_category = doc["Sub-Category"]
+        sub_sub_category = doc["Sub-Sub-Category"]
 
         # Generate embedding
-        embedding = get_embedding(description)
+        embedding = get_embedding(description + " " + title)  # Combine Title and Description for embedding
         # Replace 768 with actual dimensions
         if not embedding or len(embedding) != 768:
             print(f"Skipping document {i} due to invalid embedding.")
             continue
 
         document = {
+            "Title": title,
             "Description": description,
             "Category": category,
             "Sub-Category": sub_category,
+            "Sub-sub-Category": sub_sub_category,
             "embedding": embedding
         }
 
         try:
-            es.index(index="documents", id=i, document=document)
+            es.index(index="categories_index", id=i, document=document)
             print(f"Document {i} indexed successfully.")
         except Exception as e:
             print(f"Failed to index document {i}: {e}")
