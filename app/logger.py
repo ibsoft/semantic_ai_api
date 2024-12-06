@@ -5,7 +5,7 @@ from app.config import Config
 class RequestFormatter(logging.Formatter):
     def format(self, record):
         # Try to get the client's IP address
-        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr) if request else "SEMANTIC-API"
+        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr) if request else "SEMANTIC-CATEGORIES-API"
         # Prepend the IP address to the log message
         record.client_ip = client_ip
         return super().format(record)

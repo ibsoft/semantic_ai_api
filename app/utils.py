@@ -137,7 +137,7 @@ def classify(query, documents, highest_score_doc):
     logger.debug(f"Available sub-subcategories: {existing_sub_subcategories}")
 
     # Log the highest-scoring document details
-    logger.info(f"Highest scoring document: {highest_score_doc.get('Title', 'N/A')} with score {highest_score_doc.get('Score', 'N/A')}")
+    #logger.info(f"Highest scoring document: {highest_score_doc.get('Title', 'N/A')} with score {highest_score_doc.get('Score', 'N/A')}")
 
     # Construct the highest-scoring document information
     highest_doc_info = f"""
