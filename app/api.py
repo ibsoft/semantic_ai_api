@@ -152,7 +152,7 @@ def get_ai_response():
 @api_bp.route('/memory', methods=['POST'])
 @jwt_required()
 def store_memory():
-    """Store a new document with category, subcategory, description, and title."""
+    """Store a new document with category."""
     logging.info("Memory endpoint accessed")
 
     # Get current user identity
@@ -160,35 +160,26 @@ def store_memory():
 
     # Get the data from the request
     data = request.get_json()
-    title = data.get("Title")
     category = data.get("Category")
-    sub_category = data.get("Subcategory")
-    sub_sub_category = data.get("Subsubcategory")
-    description = data.get("Description")
 
-    if not title or not category or not sub_category or not sub_sub_category or not description:
-        logging.warning("Missing title, category, subcategory, subsubcategory or description in memory request")
-        return jsonify({"msg": "Title, Category, Subcategory, subsubcategory and Description are required"}), 400
+    if not category:
+        logging.warning("Missing category in memory request")
+        return jsonify({"msg": "Category is required"}), 400
 
-    # Generate embedding for the title + description combined
-    combined_text = title + " " + description
-    embedding = get_embedding(combined_text)
+    # Generate embedding for the category
+    embedding = get_embedding(category)
     if not embedding or len(embedding) != 768:
-        logging.error("Failed to generate valid embedding for the title and description")
-        return jsonify({"msg": "Error generating embedding for the title and description"}), 500
+        logging.error("Failed to generate valid embedding for the category")
+        return jsonify({"msg": "Error generating embedding for the category"}), 500
 
     # Index document in Elasticsearch
     document = {
-        "Title": title,
-        "Description": description,
         "Category": category,
-        "Sub-Category": sub_category,
-        "Sub-sub-Category":sub_sub_category,
         "embedding": embedding
     }
 
     try:
-        es.index(index="categories_index", document=document)
+        es.index(index="categories_db", document=document)
         logging.info("Document indexed successfully")
         return jsonify({"msg": "Document stored successfully"}), 201
     except Exception as e:

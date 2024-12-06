@@ -11,7 +11,7 @@ class Config:
     OLLAMA_API_URL = os.getenv(
         "OLLAMA_API_URL", "http://localhost:11434/api/embeddings")
     OLLAMA_MODEL = "paraphrase-multilingual"
-    MODEL = "gpt-4o-mini"  # Set this to your GPT model ID or name
+    MODEL = "gpt-4o"  # Set this to your GPT model ID or name
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
     # Redis URL for caching
     REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")

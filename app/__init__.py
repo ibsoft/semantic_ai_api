@@ -60,25 +60,23 @@ def create_app():
                 logger.info("Database tables already exist. Skipping creation.")
             
                            # Ensure Elasticsearch index is set up
-                def create_index_with_mapping(index_name="categories_index"):
+                def create_index_with_mapping(index_name="categories_db"):
                     """
                     Create Elasticsearch index with the necessary mapping for vector search.
                     """
                     mapping = {
-                    "mappings": {
-                        "properties": {
-                            "Title": {"type": "text"},
-                            "Description": {"type": "text"},
-                            "Category": {"type": "keyword"},
-                            "Sub-Category": {"type": "keyword"},
-                            "Sub-Sub-Category": {"type": "keyword"},
-                            "embedding": {
-                                "type": "dense_vector",
-                                "dims": 768  # Replace with correct dimensions
+                        "mappings": {
+                            "properties": {
+                                "Category": {"type": "keyword"},  # Mapping only for the category name
+                                "embedding": {
+                                    "type": "dense_vector",
+                                    "dims": 768  # Replace with correct embedding dimensions
+                                }
                             }
                         }
                     }
-                }
+                    
+                
 
                     if not es.indices.exists(index=index_name):
                         es.indices.create(index=index_name, body=mapping)
