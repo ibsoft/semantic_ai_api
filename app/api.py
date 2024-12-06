@@ -20,6 +20,7 @@ es = Elasticsearch(Config.ELASTICSEARCH_URL)
 api_bp = Blueprint('api', __name__)
 
 @api_bp.route('/register', methods=['POST'])
+@jwt_required()
 def register_user():
     logging.info("Register endpoint accessed")
     data = request.get_json()
@@ -144,7 +145,7 @@ def get_ai_response():
         "cached": "false",
         "time": elapsed_time
     }
-    logging.info(f"Returning response for query: '{query}'")
+    logging.info(f"Returning AI response completed!")
     return Response(json.dumps(response, ensure_ascii=False), mimetype='application/json; charset=utf-8')
 
 

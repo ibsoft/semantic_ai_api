@@ -1,0 +1,16 @@
+[Unit]
+Description=Gunicorn Application Server
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/gunicorn_service.sh start background
+ExecStop=/usr/local/bin/gunicorn_service.sh stop
+ExecReload=/usr/local/bin/gunicorn_service.sh stop && /usr/local/bin/gunicorn_service.sh start background
+PIDFile=/path/to/your/gunicorn.pid
+User=your_user
+Group=your_user_group
+Restart=always
+Environment=PATH=/path/to/your/venv/bin:/usr/bin:/usr/local/bin
+
+[Install]
+WantedBy=multi-user.target

@@ -1,36 +1,49 @@
 #!/bin/bash
 
+# Dynamically set the path to the virtual environment
+SCRIPT_DIR=$(dirname "$(realpath "$0")")
+VENV_PATH="$SCRIPT_DIR/venv"
+
 # Set variables
 APP_NAME="run:app"  # The entry point of your app
 HOST="0.0.0.0"
 PORT="8001"
 WORKERS=4
-PID_FILE="gunicorn.pid"
+PID_FILE="$SCRIPT_DIR/gunicorn.pid"
 
 # Function to start gunicorn
 start_gunicorn() {
     echo "Starting Gunicorn..."
+    # Activate the virtual environment
+    if [ -d "$VENV_PATH" ]; then
+        source "$VENV_PATH/bin/activate"
+    else
+        echo "Virtual environment not found at $VENV_PATH. Please set up the virtual environment."
+        exit 1
+    fi
+
     # Check if Gunicorn is already running
     if [ -f "$PID_FILE" ] && kill -0 $(cat "$PID_FILE") > /dev/null 2>&1; then
         echo "Gunicorn is already running."
     else
         if [ "$2" == "background" ]; then
-            gunicorn -w $WORKERS -b $HOST:$PORT $APP_NAME --pid $PID_FILE &
+            gunicorn -w $WORKERS -b $HOST:$PORT $APP_NAME --pid $PID_FILE --timeout 600 &
             echo "Gunicorn started in the background with PID $(cat $PID_FILE)."
         else
-            gunicorn -w $WORKERS -b $HOST:$PORT $APP_NAME --pid $PID_FILE
+            gunicorn -w $WORKERS -b $HOST:$PORT $APP_NAME --pid $PID_FILE --timeout 600
             echo "Gunicorn started in the foreground with PID $(cat $PID_FILE)."
         fi
     fi
+
+    # Deactivate the virtual environment
+    deactivate
 }
 
 # Function to stop gunicorn
 stop_gunicorn() {
     echo "Stopping Gunicorn..."
-    # Check if Gunicorn is running
     if [ -f "$PID_FILE" ]; then
         PID=$(cat "$PID_FILE")
-        # Check if the process is still running
         if kill -0 $PID > /dev/null 2>&1; then
             kill $PID
             rm -f "$PID_FILE"
@@ -44,11 +57,10 @@ stop_gunicorn() {
     fi
 }
 
-# Function to show usage (check if gunicorn is running and show stats)
+# Function to show usage
 show_usage() {
     if [ -f "$PID_FILE" ] && kill -0 $(cat "$PID_FILE") > /dev/null 2>&1; then
         echo "Gunicorn is running with PID $(cat "$PID_FILE")"
-        # Show usage (you can adjust this as needed)
         ps -p $(cat "$PID_FILE") -o %cpu,%mem,etime,cmd
     else
         echo "Gunicorn is not running."

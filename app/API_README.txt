@@ -157,3 +157,44 @@ Security
 Error Handling
 
 The API provides descriptive error messages for all invalid inputs and server errors.
+
+
+
+Examples:
+
+Login:
+
+curl -X POST http://localhost:5000/login \
+-H "Content-Type: application/json" \
+-d '{"username": "existing_user", "password": "user_password"}'
+
+
+
+Register:
+
+curl -X POST http://localhost:5000/register \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer YOUR_JWT_TOKEN" \
+-d '{"username": "new_user", "password": "secure_password"}'
+
+
+Classify:
+
+curl -X POST http://localhost:5000/classify \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer YOUR_JWT_TOKEN" \
+-d '{"title": "Example Title", "message": "This is an example message for classification"}'
+
+
+Memory:  (Add New category Example)
+
+curl -X POST http://localhost:5000/memory \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer YOUR_JWT_TOKEN" \
+-d '{
+  "Title": "Sample Title",
+  "Category": "Sample Category",
+  "Subcategory": "Sample Subcategory",
+  "Subsubcategory": "Sample Subsubcategory",
+  "Description": "This is a detailed description of the sample document."
+}'
