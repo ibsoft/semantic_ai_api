@@ -200,7 +200,124 @@ def store_memory():
     except Exception as e:
         logging.error(f"Error indexing document: {str(e)}")
         return jsonify({"msg": f"Error storing document: {str(e)}"}), 500
-    
+
+
+@api_bp.route('/category-delete', methods=['DELETE'])
+@jwt_required()
+def delete_category():
+    """Delete a category based on TCID."""
+    logging.info("Category delete endpoint accessed")
+
+    # Get current user identity
+    user_identity = get_jwt_identity()
+    logging.info(f"User {user_identity} requested to delete a category.")
+
+    # Get the data from the request
+    data = request.get_json()
+    tcid = data.get("TCID")
+
+    if not tcid:
+        logging.warning("Missing TCID in category delete request")
+        return jsonify({"msg": "TCID is required"}), 400
+
+    # Search for the document with the provided TCID
+    try:
+        # Delete the document from Elasticsearch by TCID
+        response = es.delete_by_query(
+            index="skl_categories_index",
+            body={
+                "query": {
+                    "match": {
+                        "TCID": tcid
+                    }
+                }
+            }
+        )
+        if response['deleted'] > 0:
+            logging.info(f"Category with TCID {tcid} deleted successfully.")
+            return jsonify({"msg": "Category deleted successfully"}), 200
+        else:
+            logging.warning(f"Category with TCID {tcid} not found.")
+            return jsonify({"msg": "Category not found"}), 404
+    except Exception as e:
+        logging.error(f"Error deleting category: {str(e)}")
+        return jsonify({"msg": f"Error deleting category: {str(e)}"}), 500
+
+
+@api_bp.route('/category-update', methods=['PUT'])
+@jwt_required()
+def update_category():
+    """Update a category based on TCID."""
+    logging.info("Category update endpoint accessed")
+
+    # Get current user identity
+    user_identity = get_jwt_identity()
+    logging.info(f"User {user_identity} requested to update a category.")
+
+    # Get the data from the request
+    data = request.get_json()
+    tcid = data.get("TCID")
+    category = data.get("Category")
+    supercategory = data.get("Supercategory", "Unknown")
+    subcategory = data.get("Subcategory", "Unknown")
+    category_code = data.get("CategoryCode", "None")
+    subcategory_code = data.get("SubcategoryCode", "None")
+    significance = data.get("Significance", "Low")
+
+    if not tcid or not category:
+        logging.warning("Missing TCID or category in category update request")
+        return jsonify({"msg": "TCID and category are required"}), 400
+
+    # Generate embedding for the updated category
+    embedding = get_embedding(category)
+    if not embedding or len(embedding) != 768:
+        logging.error("Failed to generate valid embedding for the category")
+        return jsonify({"msg": "Error generating embedding for the category"}), 500
+
+    # Update the document in Elasticsearch based on TCID
+    try:
+        # Update the document in Elasticsearch
+        response = es.update_by_query(
+            index="skl_categories_index",
+            body={
+                "script": {
+                    "source": """
+                        ctx._source.CATEGORY = params.category;
+                        ctx._source.SUPERCATEGORY = params.supercategory;
+                        ctx._source.SUBCATEGORY = params.subcategory;
+                        ctx._source.CATEGORY_CODE = params.category_code;
+                        ctx._source.SUBCATEGORY_CODE = params.subcategory_code;
+                        ctx._source.SIGNIFICANCE = params.significance;
+                        ctx._source.embedding = params.embedding;
+                    """,
+                    "lang": "painless",
+                    "params": {
+                        "category": category,
+                        "supercategory": supercategory,
+                        "subcategory": subcategory,
+                        "category_code": category_code,
+                        "subcategory_code": subcategory_code,
+                        "significance": significance,
+                        "embedding": embedding
+                    }
+                },
+                "query": {
+                    "match": {
+                        "TCID": tcid
+                    }
+                }
+            }
+        )
+        if response['updated'] > 0:
+            logging.info(f"Category with TCID {tcid} updated successfully.")
+            return jsonify({"msg": "Category updated successfully"}), 200
+        else:
+            logging.warning(f"Category with TCID {tcid} not found.")
+            return jsonify({"msg": "Category not found"}), 404
+    except Exception as e:
+        logging.error(f"Error updating category: {str(e)}")
+        return jsonify({"msg": f"Error updating category: {str(e)}"}), 500
+
     
 # Route for storing memory - new example
 @api_bp.route('/example-add', methods=['POST'])
