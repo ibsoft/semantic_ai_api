@@ -15,12 +15,12 @@ from flask import request
 
 logger = logging.getLogger()
 
-
 es = Elasticsearch(Config.ELASTICSEARCH_URL)
 
 api_bp = Blueprint('api', __name__)
 
 @api_bp.route('/register', methods=['POST'])
+@jwt_required()
 def register_user():
     logging.info("Register endpoint accessed")
     data = request.get_json()
@@ -85,10 +85,15 @@ def get_ai_response():
 
     # Retrieve the user query
     data = request.get_json()
-    query = data.get("query")
-    if not query:
-        logging.warning("Classify request missing 'query' parameter")
-        return jsonify({"msg": "Query is required"}), 400
+    title = data.get("title")
+    message = data.get("message")
+
+    if not title or not message:
+        logging.warning("Classify request missing 'title' or 'message' parameter")
+        return jsonify({"msg": "Title and message are required"}), 400
+
+    # Combine title and message to form the query
+    query = f"{title} - {message}"
 
     # Check Redis cache for a stored result
     if Config.USE_REDIS:
@@ -123,8 +128,15 @@ def get_ai_response():
             redis_client.setex(rate_limit_key, Config.RATE_LIMIT_WINDOW_SECONDS, 1)
             logging.debug(f"Rate limit key set for user '{user_identity}' with a window of {Config.RATE_LIMIT_WINDOW_SECONDS} seconds")
 
+        # Convert sets to lists before serializing
+        if isinstance(ai_response, set):
+            ai_response = list(ai_response)
+        
+        logging.debug(f"ai_response type: {type(ai_response)}, content: {ai_response}")
+        
         # Cache the AI response
         redis_client.setex(query, Config.REDIS_CACHE_EXPIRATION, json.dumps(ai_response, ensure_ascii=False))
+
         logging.info(f"Cached response for query: '{query}' with expiration {Config.REDIS_CACHE_EXPIRATION} seconds")
 
     # Return the AI response
@@ -133,45 +145,107 @@ def get_ai_response():
         "cached": "false",
         "time": elapsed_time
     }
-    logging.info(f"Returning response for query: '{query}'")
+    logging.info(f"Returning AI response completed!")
     return Response(json.dumps(response, ensure_ascii=False), mimetype='application/json; charset=utf-8')
 
 
-@api_bp.route('/memory', methods=['POST'])
+# Route for storing memory - new category
+@api_bp.route('/category-add', methods=['POST'])
 @jwt_required()
 def store_memory():
-    """Store a new document with category, subcategory, description."""
+    """Store a new document with category."""
     logging.info("Memory endpoint accessed")
 
     # Get current user identity
     user_identity = get_jwt_identity()
+    logging.info("User " + user_identity + " added a category.")
 
     # Get the data from the request
     data = request.get_json()
     category = data.get("Category")
-    sub_category = data.get("Subcategory")
-    description = data.get("Description")
+    supercategory = data.get("Supercategory", "Unknown")  # Default to "Unknown" if not provided
+    subcategory = data.get("Subcategory", "Unknown")  # Default to "Unknown" if not provided
+    category_code = data.get("CategoryCode", "None")  # Default to "None" if not provided
+    subcategory_code = data.get("SubcategoryCode", "None")  # Default to "None" if not provided
+    significance = data.get("Significance", "Low")  # Default to "Low" if not provided
+    tcid = data.get("TCID", 0)  # Default to 0 if not provided
 
-    if not category or not sub_category or not description:
-        logging.warning("Missing category, subcategory, or description in memory request")
-        return jsonify({"msg": "Category, Subcategory, and Description are required"}), 400
+    if not category:
+        logging.warning("Missing category in memory request")
+        return jsonify({"msg": "Category is required"}), 400
 
-    # Generate embedding for the description
-    embedding = get_embedding(description)
+    # Generate embedding for the category
+    embedding = get_embedding(category)
     if not embedding or len(embedding) != 768:
-        logging.error("Failed to generate valid embedding for the description")
-        return jsonify({"msg": "Error generating embedding for the description"}), 500
+        logging.error("Failed to generate valid embedding for the category")
+        return jsonify({"msg": "Error generating embedding for the category"}), 500
 
-    # Index document in Elasticsearch
+    # Create document with the additional fields
     document = {
-        "Description": description,
-        "Category": category,
-        "Sub-Category": sub_category,
+        "SUPERCATEGORY": supercategory,
+        "CATEGORY": category,
+        "CATEGORY_CODE": category_code,
+        "SUBCATEGORY": subcategory,
+        "SUBCATEGORY_CODE": subcategory_code,
+        "SIGNIFICANCE": significance,
+        "TCID": tcid,
         "embedding": embedding
     }
 
     try:
-        es.index(index="documents", document=document)
+        # Index document in Elasticsearch
+        es.index(index="skl_categories_index", document=document)
+        logging.info("Document indexed successfully")
+        return jsonify({"msg": "Document stored successfully"}), 201
+    except Exception as e:
+        logging.error(f"Error indexing document: {str(e)}")
+        return jsonify({"msg": f"Error storing document: {str(e)}"}), 500
+    
+    
+# Route for storing memory - new example
+@api_bp.route('/example-add', methods=['POST'])
+@jwt_required()
+def store_example():
+    """Store a new document with example."""
+    logging.info("Memory endpoint accessed")
+
+    # Get current user identity
+    user_identity = get_jwt_identity()
+    logging.info("User " + user_identity + " added an example.")
+
+    # Get the data from the request
+    data = request.get_json()
+    title = data.get("Title")
+    message = data.get("Message")
+    category = data.get("Category")
+    supercategory = data.get("Supercategory", "Unknown")  # Default to "Unknown" if not provided
+    subcategory = data.get("Subcategory", "Unknown")  # Default to "Unknown" if not provided
+    tcid = data.get("TCID", 0)  # Default to 0 if not provided
+
+    if not category:
+        logging.warning("Missing category in memory request")
+        return jsonify({"msg": "Category is required"}), 400
+
+    # Generate embedding for the category
+    embedding = get_embedding(category)
+    if not embedding or len(embedding) != 768:
+        logging.error("Failed to generate valid embedding for the category")
+        return jsonify({"msg": "Error generating embedding for the category"}), 500
+
+    # Create document with the additional fields
+    document = {
+        "TITLE": title,
+        "MESSAGE": message,
+        "SUPERCATEGORY": supercategory,
+        "CATEGORY": category,
+        "SUBCATEGORY": subcategory,
+        "TCID": tcid,
+        "embedding": embedding
+    }
+
+    try:
+        # Index document in Elasticsearch
+        es.index(index="skl_examples_index", document=document)
         logging.info("Document indexed successfully")
         return jsonify({"msg": "Document stored successfully"}), 201
     except Exception as e:
