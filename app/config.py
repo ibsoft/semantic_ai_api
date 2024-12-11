@@ -23,4 +23,4 @@ class Config:
     USE_REDIS = False  # Check if Redis caching is enabled
     USE_EXAMPLES = True
     REDIS_CACHE_EXPIRATION = 3600  # Cache expiration in seconds
-    EXAMPLES_SIMILARITY_THRESHOLD = 0.7 #Higher Thresholds (e.g., 0.9): Stricter matching, fewer but more relevant results. Lower Thresholds (e.g., 0.5): Looser matching, more results, including less relevant ones.
+    EXAMPLES_SIMILARITY_THRESHOLD = 0.8 #Higher Thresholds (e.g., 0.9): Stricter matching, fewer but more relevant results. Lower Thresholds (e.g., 0.5): Looser matching, more results, including less relevant ones.

@@ -128,7 +128,8 @@ def classify_text(query, es):
                 "MESSAGE": hit["_source"].get("MESSAGE", ""),
                 "SUPERCATEGORY": hit["_source"].get("SUPERCATEGORY", ""),
                 "CATEGORY": hit["_source"].get("CATEGORY", ""),
-                "SUBCATEGORY": hit["_source"].get("SUBCATEGORY", "")
+                "SUBCATEGORY": hit["_source"].get("SUBCATEGORY", ""),
+                 "_score": hit.get("_score", 0) 
             }
             for hit in vector_search_response["hits"]["hits"]
         ]
@@ -137,9 +138,14 @@ def classify_text(query, es):
         logger.error(f"Error performing vector search: {e}")
         vector_search_examples = []
 
+
+    # Log the scores of each example
+    for example in vector_search_examples:
+        logger.info(f"Score for example with  {example.get('TITLE', 'N/A')}: {example.get('_score', 0)}")
+
     # Filter vector search examples based on similarity threshold
     relevant_vector_search_examples = [
-        example for example in vector_search_examples if example.get("_score", 0) >= SIMILARITY_THRESHOLD
+    example for example in vector_search_examples if example["_score"] >= SIMILARITY_THRESHOLD
     ]
 
     # If no relevant examples are found, set it to None
