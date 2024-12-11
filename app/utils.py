@@ -9,6 +9,8 @@ from elasticsearch import Elasticsearch
 import re
 
 
+
+
 # Initialize OpenAI API key and logger
 openai.api_key = Config.OPENAI_API_KEY
 logger = logging.getLogger()

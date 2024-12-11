@@ -1,7 +1,7 @@
 import importlib
 import logging
 from elasticsearch import Elasticsearch
-from flask import Flask
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import inspect
 from flask_jwt_extended import JWTManager
@@ -96,5 +96,13 @@ def create_app():
     # Register Blueprints
     from app.api import api_bp
     app.register_blueprint(api_bp, url_prefix='/api/v1/')
+    
+    @app.errorhandler(500)
+    def internal_error(error):
+        return jsonify({"msg": "Internal Server Error"}), 500
+
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({"msg": "Not Found"}), 404
     
     return app
