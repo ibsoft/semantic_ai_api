@@ -111,11 +111,15 @@ Response:
 
 Example:
 
-    {
-        "response": "AI classification result",
-        "cached": "true",
-        "time": 0.5
-    }
+{
+    "response": {
+        "supercategory": "string",
+        "category": "string",
+        "subcategory": "string"
+    },
+    "cached": "false",
+    "time": 2.47
+}
 
 4. /category-add - Store a new category
 

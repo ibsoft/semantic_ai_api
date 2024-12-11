@@ -1,6 +1,5 @@
 import logging
 from app import create_app, db
-from app.config import DevelopmentConfig, ProductionConfig
 from app.logger import setup_logging
 
 # Set up logging first
@@ -9,12 +8,6 @@ setup_logging()
 # Create the app instance
 app = create_app()
 
-# Choose configuration based on environment variable FLASK_ENV
-env = app.config.get("ENV", "development")  # Default to 'development' if 'ENV' is missing
-if env == "production":
-    app.config.from_object(ProductionConfig)
-else:
-    app.config.from_object(DevelopmentConfig)
 
 # Initialize the app context
 with app.app_context():

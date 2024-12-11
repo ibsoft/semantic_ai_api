@@ -152,7 +152,10 @@ def classify_text(query, es):
 
     # If no relevant examples are found, set it to None
     if not relevant_vector_search_examples:
+        logging.info(f"No relevant example hit config score {Config.EXAMPLES_SIMILARITY_THRESHOLD}, Setting to None!")
         relevant_vector_search_examples = None
+    else:
+        logging.info(f"We've got hit. Passing example to model")
 
     elapsed_time = round(time.time() - start_time, 2)
 
@@ -192,7 +195,7 @@ def classify(query, hierarchical_data, vector_search_examples):
 
         **Ερώτημα Χρήστη:** {query}
         
-        **Παραδείγματα σχετικά με το ερώτημα του χρήστη. (Αν υπάρχουν):**
+        **Παραδείγματα σχετικά με το ερώτημα του χρήστη. (Αν υπάρχουν) Δες αν σε βοηθάνε να κατηγοριοποιήσεις:**
         {json.dumps(vector_search_examples, indent=2)}
 
         **Μορφή εξόδου (αυστηρά απαιτούμενη):**
@@ -252,7 +255,7 @@ def classify(query, hierarchical_data, vector_search_examples):
         logger.info(f"Prompt tokens: {usage_info.get('prompt_tokens', 'N/A')}")
         logger.info(f"Completion tokens: {usage_info.get('completion_tokens', 'N/A')}")
         logger.debug(f"Response content: {response['choices'][0]['message']['content']}")
-        logger.info(f"AI Classification Response: {classification_response}")
+        logger.debug(f"AI Classification Response: {classification_response}")
 
         # Parse the response to remove redundant prefixes
         supercategory, category, subcategory = parse_classification_response(classification_response)

@@ -19,7 +19,7 @@ class Config:
 
     # Redis Configuration
     REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-    USE_REDIS = os.getenv("USE_REDIS", "False").lower() in ["true", "1", "t", "y", "yes"]
+    USE_REDIS = False
     REDIS_CACHE_EXPIRATION = int(os.getenv("REDIS_CACHE_EXPIRATION", 3600))  # Cache expiration in seconds
 
     # SQLAlchemy Configuration (Database)
@@ -34,16 +34,5 @@ class Config:
     USE_EXAMPLES = os.getenv("USE_EXAMPLES", "True").lower() in ["true", "1", "t", "y", "yes"]
     EXAMPLES_SIMILARITY_THRESHOLD = float(os.getenv("EXAMPLES_SIMILARITY_THRESHOLD", 0.8))  # Similarity threshold for examples
 
-# Environment-specific configuration
-class DevelopmentConfig(Config):
-    DEBUG = True
-    LOG_LEVEL = "DEBUG"
-    SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI", "sqlite:///:memory:")  # In-memory DB for development
-
-class ProductionConfig(Config):
-    DEBUG = False
-    LOG_LEVEL = "ERROR"  # Set to error level in production
-    SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI", "postgres://user:password@localhost/prod_db")
-
-# Select configuration based on the environment
-config_class = DevelopmentConfig if os.getenv("FLASK_ENV") == "development" else ProductionConfig
+    #Development
+    DEBUG = True 
