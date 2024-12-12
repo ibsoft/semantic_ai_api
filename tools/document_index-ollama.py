@@ -3,7 +3,7 @@ import json
 from elasticsearch import Elasticsearch
 
 # Elasticsearch setup
-es = Elasticsearch(["http://localhost:9200"])
+es = Elasticsearch(["http://192.168.1.4:9200"])
 
 # Ollama API setup
 OLLAMA_API_URL = "http://localhost:11434/api/embeddings"
@@ -30,23 +30,81 @@ def get_embedding(text):
 
 def create_index():
     index_mapping = {
-    "mappings": {
-        "properties": {
-            "SUPERCATEGORY": {"type": "text"},
-            "CATEGORY": {"type": "text"},
-            "CATEGORY_CODE": {"type": "keyword"},
-            "SUBCATEGORY": {"type": "text"},
-            "SUBCATEGORY_CODE": {"type": "keyword"},
-            "SIGNIFICANCE": {"type": "keyword"},
-            "TCID": {"type": "integer"},
-            "embedding": {"type": "dense_vector", "dims": 768},
+        "mappings": {
+            "properties": {
+                "SUPERCATEGORY": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword"
+                        }
+                    }
+                },
+                "CATEGORY": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword"
+                        }
+                    }
+                },
+                "CATEGORY_CODE": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
+                "SUBCATEGORY": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
+                "SUBCATEGORY_CODE": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
+                "SIGNIFICANCE": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
+                "TCID": {
+                    "type": "long"
+                },
+                "embedding": {
+                    "type": "dense_vector",
+                    "dims": 768,
+                    "index": True,
+                    "similarity": "cosine",
+                    "index_options": {
+                        "type": "int8_hnsw",
+                        "m": 16,
+                        "ef_construction": 100
+                    }
+                }
+            }
         }
     }
-}
 
     # Delete index if it exists
-    es.indices.delete(index="skl_categories_index", ignore=[400, 404])
-    es.indices.create(index="skl_categories_index", body=index_mapping, ignore=400)
+    es.indices.delete(index="new_skl_categories_index_v2", ignore=[400, 404])
+    es.indices.create(index="new_skl_categories_index_v2", body=index_mapping, ignore=400)
 
 
 def index_documents(data):
@@ -77,7 +135,7 @@ def index_documents(data):
         }
 
         try:
-            es.index(index="skl_categories_index", id=i, document=document)
+            es.index(index="new_skl_categories_index_v2", id=i, document=document)
             print(f"Document {i} indexed successfully.")
         except Exception as e:
             print(f"Failed to index document {i}: {e}")

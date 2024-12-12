@@ -3,7 +3,7 @@ import json
 from elasticsearch import Elasticsearch
 
 # Elasticsearch setup
-es = Elasticsearch(["http://localhost:9200"])
+es = Elasticsearch(["http://192.168.1.4:9200"])
 
 # Ollama API setup
 OLLAMA_API_URL = "http://localhost:11434/api/embeddings"

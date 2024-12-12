@@ -98,7 +98,7 @@ def classify_text(query, es):
                     subcategory_name = subcategory['key']
                     hierarchical_data[supercategory_name][category_name].append(subcategory_name if subcategory_name != "None" else None)
 
-        logger.debug(f"Hierarchical data: {json.dumps(hierarchical_data, indent=2)}")
+        logger.info(f"Hierarchical data: {json.dumps(hierarchical_data, indent=2)}")
     except Exception as e:
         logger.error(f"Error while searching Elasticsearch: {e}")
         hierarchical_data = {}

@@ -28,7 +28,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Elasticsearch Configuration
-    ELASTICSEARCH_URL = os.getenv("ELASTICSEARCH_URL", "http://localhost:9200")
+    ELASTICSEARCH_URL = os.getenv("ELASTICSEARCH_URL", "http://192.168.1.4:9200")
 
     # General Settings
     USE_EXAMPLES = os.getenv("USE_EXAMPLES", "True").lower() in ["true", "1", "t", "y", "yes"]
