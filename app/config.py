@@ -32,7 +32,7 @@ class Config:
 
     # General Settings
     USE_EXAMPLES = os.getenv("USE_EXAMPLES", "True").lower() in ["true", "1", "t", "y", "yes"]
-    EXAMPLES_SIMILARITY_THRESHOLD = float(os.getenv("EXAMPLES_SIMILARITY_THRESHOLD", 0.8))  # Similarity threshold for examples
+    EXAMPLES_SIMILARITY_THRESHOLD = float(os.getenv("EXAMPLES_SIMILARITY_THRESHOLD", 0.9))  # Similarity threshold for examples
 
     #Development
     DEBUG = True 

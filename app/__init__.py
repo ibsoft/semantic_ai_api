@@ -60,7 +60,7 @@ def create_app():
                 logger.info("Database tables already exist. Skipping creation.")
             
                            # Ensure Elasticsearch index is set up
-                def create_index_with_mapping(index_name="skl_categories_index"):
+                def create_index_with_mapping(index_name="new_skl_categories_index_v2"):
                     """
                     Create Elasticsearch index with the necessary mapping for vector search.
                     """
