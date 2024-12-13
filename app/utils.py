@@ -29,7 +29,7 @@ def get_embedding(text):
     try:
         response = requests.post(Config.OLLAMA_API_URL, headers=headers, json=payload, timeout=30)
         response.raise_for_status()
-        logger.info(f"Successfully fetched embedding for text: {text}")
+        logger.debug(f"Successfully fetched embedding for text: {text}")
         return response.json().get("embedding", None)
     except requests.RequestException as e:
         logger.error(f"Request failed: {e}")

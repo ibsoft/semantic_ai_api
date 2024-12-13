@@ -3,7 +3,7 @@ import os
 class Config:
     # Secret key for JWT
     SECRET_KEY = os.getenv("SECRET_KEY", "your_secret_key")
-    JWT_EXPIRATION = int(os.getenv("JWT_EXPIRATION", 3600))  # 1 hour, configurable
+    JWT_EXPIRATION = int(os.getenv("JWT_EXPIRATION", 86400))  # 24 hours, configurable
     RATE_LIMIT_MAX_REQUESTS = int(os.getenv("RATE_LIMIT_MAX_REQUESTS", 10000))  # Max requests per time window
     RATE_LIMIT_WINDOW_SECONDS = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", 60))  # 1 minute default
 
