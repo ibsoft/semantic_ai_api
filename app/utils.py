@@ -177,7 +177,7 @@ def classify_text(query, es):
 # Function to classify based on the query, hierarchical data, and vector search examples
 def classify(query, hierarchical_data, vector_search_examples):
     if Config.USE_EXAMPLES:
-        logger.info("Using Examples")
+        logger.info("Using Examples, enabled.")
         prompt = f"""
         Στόχος σου είναι να Αναλύσεις μια λίστα κατηγοριών με υποκατηγορίες, οι οποίες οργανώνονται σε αυστηρή ιεραρχία:
 
@@ -213,9 +213,9 @@ def classify(query, hierarchical_data, vector_search_examples):
  """
 
     else:
-        logger.info("NOT using Examples")
+        logger.info("Using Examples, disabled.")
         prompt = f"""
-        Στόχος σου είναι να Αναλύσεις μια λίστα κατηγοριών με υποκατηγορίες, οι οποίες οργανώνονται σε αυστηρή ιεραρχία:
+         Στόχος σου είναι να Αναλύσεις μια λίστα κατηγοριών με υποκατηγορίες, οι οποίες οργανώνονται σε αυστηρή ιεραρχία:
 
         1. **Υπερκατηγορίες**: Κάθε υπερκατηγορία περιέχει πολλές κατηγορίες.
         2. **Κατηγορίες**: Κάθε κατηγορία περιέχει πολλές υποκατηγορίες.
@@ -225,20 +225,23 @@ def classify(query, hierarchical_data, vector_search_examples):
         2. **Εντοπίσε την πιο σχετική επιλογή** από τις προκαθορισμένες λίστες με βάση το ερώτημα του χρήστη.
         3. **Μην επιλέγεις την πρώτη επιλογή** στην ιεραρχία, αλλά την επιλογή που είναι πιο σχετική με βάση τα συμφραζόμενα ή τις λέξεις-κλειδιά που δίνονται στο ερώτημα.
         4. Εάν καμία υποκατηγορία δεν είναι σχετική, επίλεξε "Καμία".
+        5. Η ιεραρχική δομή πρέπει να τηρείται αυστηρά.
+        6. **Δεν επιτρέπεται** να επιλέξεις κατηγορία ή υποκατηγορία που δεν ανήκει στην επιλεγμένη υπερκατηγορία.
+        7. Να δίνεις ακριβώς τα όνοματα των υπερκατηγοριών, κατηγοριών και υποκατηγοριών
+        
 
         **Προκαθορισμένες Λίστες (εξουσιοδοτημένες):**
         {json.dumps(hierarchical_data, indent=2, ensure_ascii=False)}
 
         **Ερώτημα Χρήστη:** {query}
-        
+
         **Μορφή εξόδου (αυστηρά απαιτούμενη):**
-        - Supercategory: [Επίλεξε μία από τις προκαθορισμένες υπερκατηγορίες]
-        - Category: [Επίλεξε μία από τις προκαθορισμένες κατηγορίες κάτω από την επιλεγμένη υπερκατηγορία]
-        - Sub-Category: [Επίλεξε μία από τις προκαθορισμένες υποκατηγορίες κάτω από την επιλεγμένη κατηγορία, εάν είναι σχετική· διαφορετικά "Καμία"]
+        - Supercategory: [Επίλεξε μία από τις προκαθορισμένες υπερκατηγορίες.]
+        - Category: [Επίλεξε μία από τις προκαθορισμένες κατηγορίες κάτω από την επιλεγμένη υπερκατηγορία.]
+        - Sub-Category: [Επίλεξε μία από τις προκαθορισμένες υποκατηγορίες κάτω από την επιλεγμένη κατηγορία.]
 
         Για παράδειγμα, αν το ερώτημα του χρήστη αναφέρει "ακονιστήρι" ή "τροχός", επίλεξε την υποκατηγορία **ΑΚΟΝΙΣΤΗΡΙ** κάτω από την κατηγορία **ΜΗΧΑΝΕΣ ΚΟΠΗΣ** στην **ΥΠΕΡΚΑΤΗΓΟΡΙΑ 5.ΣΥΣΚΕΥΕΣ / ΜΗΧΑΝΕΣ**, επειδή είναι είναι σημασιολογικά σχετική.
 """
-
     try:
         response = openai.ChatCompletion.create(
             model=Config.MODEL,
@@ -256,7 +259,8 @@ def classify(query, hierarchical_data, vector_search_examples):
 
          # Log the response details including token usage
         usage_info = response.get('usage', {})
-        logger.info(f"Response from OpenAI received for query: {query}")
+        logger.info(f"Response from OpenAI received")
+        logger.debug(f"Response from OpenAI received for query: {query}")
         logger.info(f"Total tokens used: {usage_info.get('total_tokens', 'N/A')}")
         logger.info(f"Prompt tokens: {usage_info.get('prompt_tokens', 'N/A')}")
         logger.info(f"Completion tokens: {usage_info.get('completion_tokens', 'N/A')}")

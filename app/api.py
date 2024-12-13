@@ -110,7 +110,11 @@ def get_ai_response():
 
     # If not cached, query Elasticsearch and classify
     try:
-        logging.info(f"Cache miss for query: '{query}', querying Elasticsearch")
+        if Config.USE_REDIS:
+            logging.info(f"Cache miss for query: '{query}', querying Elasticsearch")
+        else:
+            logging.info(f"Cache disabled, querying Elasticsearch")
+            
         ai_response, _ = classify_text(query, es)
     except Exception as e:
         logging.error(f"Error during Elasticsearch query: {str(e)}")
