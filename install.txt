@@ -67,3 +67,9 @@ Install REDIS
 
 docker run --name redis -p 6379:6379 -d redis
 
+# For elasticsearch
+
+sudo sysctl -w vm.max_map_count=262144
+sudo sysctl -p
+
+

@@ -1,17 +1,20 @@
 import json
 import logging
+import os
 import time
+import zipfile
 from elasticsearch import Elasticsearch
-from flask import Blueprint, Response, request, jsonify
+from flask import Blueprint, Response, request, jsonify, send_file
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import check_password_hash
 from .models import db, User
 from .utils import classify_text, get_embedding
 from . import redis_client
-from datetime import timedelta
+from datetime import datetime, timedelta
 from .config import Config
 import logging
 from flask import request
+from elasticsearch import helpers
 
 logger = logging.getLogger()
 
@@ -375,3 +378,100 @@ def store_example():
     except Exception as e:
         logging.error(f"Error indexing document: {str(e)}")
         return jsonify({"msg": f"Error storing document: {str(e)}"}), 500
+    
+    
+    
+@api_bp.route('/backup-categories-index', methods=['GET'])
+@jwt_required()
+def backup_index():
+    """
+    Backup Elasticsearch index and provide a downloadable ZIP file.
+    """
+    logging.info("Backup Categories endpoint accessed")
+    index_name = request.args.get("index", "new_skl_categories_index_v2")  # Optional query param
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    
+    # Define temporary directories and file names
+    tmp_dir = "/tmp"
+    backup_filename = f"backup_{index_name}_{timestamp}.json"
+    zip_filename = f"{backup_filename}.zip"
+    
+    # Paths for the temporary backup and zip files
+    backup_file_path = os.path.join(tmp_dir, backup_filename)
+    zip_file_path = os.path.join(tmp_dir, zip_filename)
+
+    try:
+        # Query Elasticsearch for the index data
+        query = {"query": {"match_all": {}}}
+        results = helpers.scan(es, index=index_name, query=query)
+
+        # Save the results to a JSON file in the tmp folder
+        with open(backup_file_path, "w") as backup_file:
+            for doc in results:
+                backup_file.write(json.dumps(doc) + "\n")
+
+        # Create a ZIP file for the JSON backup in the tmp folder
+        with zipfile.ZipFile(zip_file_path, "w", zipfile.ZIP_DEFLATED) as zipf:
+            zipf.write(backup_file_path, arcname=backup_filename)
+
+        # Serve the ZIP file as a downloadable response
+        return send_file(zip_file_path, as_attachment=True, download_name=zip_filename)
+
+    except Exception as e:
+        logging.error(f"Error backing up index '{index_name}': {str(e)}")
+        return jsonify({"msg": f"Error backing up index: {str(e)}"}), 500
+
+    finally:
+        # Clean up the temporary files after sending the response
+        if os.path.exists(backup_file_path):
+            os.remove(backup_file_path)
+        if os.path.exists(zip_file_path):
+            os.remove(zip_file_path)
+
+
+@api_bp.route('/backup-examples-index', methods=['GET'])
+@jwt_required()
+def backup_index():
+    """
+    Backup Elasticsearch index and provide a downloadable ZIP file.
+    """
+    logging.info("Backup Examples endpoint accessed")
+    index_name = request.args.get("index", "skl_examples_index")  # Optional query param
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    
+    # Define temporary directories and file names
+    tmp_dir = "/tmp"
+    backup_filename = f"backup_{index_name}_{timestamp}.json"
+    zip_filename = f"{backup_filename}.zip"
+    
+    # Paths for the temporary backup and zip files
+    backup_file_path = os.path.join(tmp_dir, backup_filename)
+    zip_file_path = os.path.join(tmp_dir, zip_filename)
+
+    try:
+        # Query Elasticsearch for the index data
+        query = {"query": {"match_all": {}}}
+        results = helpers.scan(es, index=index_name, query=query)
+
+        # Save the results to a JSON file in the tmp folder
+        with open(backup_file_path, "w") as backup_file:
+            for doc in results:
+                backup_file.write(json.dumps(doc) + "\n")
+
+        # Create a ZIP file for the JSON backup in the tmp folder
+        with zipfile.ZipFile(zip_file_path, "w", zipfile.ZIP_DEFLATED) as zipf:
+            zipf.write(backup_file_path, arcname=backup_filename)
+
+        # Serve the ZIP file as a downloadable response
+        return send_file(zip_file_path, as_attachment=True, download_name=zip_filename)
+
+    except Exception as e:
+        logging.error(f"Error backing up index '{index_name}': {str(e)}")
+        return jsonify({"msg": f"Error backing up index: {str(e)}"}), 500
+
+    finally:
+        # Clean up the temporary files after sending the response
+        if os.path.exists(backup_file_path):
+            os.remove(backup_file_path)
+        if os.path.exists(zip_file_path):
+            os.remove(zip_file_path)
