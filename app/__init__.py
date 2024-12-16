@@ -13,6 +13,7 @@ from app.logger import setup_logging
 setup_logging()
 logger = logging.getLogger(__name__)
 
+
 # Initialize core components
 db = SQLAlchemy()
 jwt = JWTManager()

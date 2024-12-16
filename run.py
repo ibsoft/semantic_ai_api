@@ -1,4 +1,6 @@
 import logging
+
+from flask import jsonify
 from app import create_app, db
 from app.logger import setup_logging
 
@@ -7,6 +9,16 @@ setup_logging()
 
 # Create the app instance
 app = create_app()
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({"msg": "Internal Server Error"}), 500
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({"msg": "Not Found"}), 404
+
 
 
 # Initialize the app context

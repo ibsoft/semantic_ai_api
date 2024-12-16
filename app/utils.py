@@ -322,7 +322,7 @@ def parse_classification_response(classification_response):
                     category = value
                 elif key == "subcategory":
                     subcategory = value
-
+ 
     logger.info(f"Supercategory: {supercategory}, Category: {category}, Subcategory: {subcategory}")
     
     return supercategory, category, subcategory
