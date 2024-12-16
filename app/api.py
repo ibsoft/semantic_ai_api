@@ -383,7 +383,7 @@ def store_example():
     
 @api_bp.route('/backup-categories-index', methods=['GET'])
 @jwt_required()
-def backup_index():
+def backup_index_categories():
     """
     Backup Elasticsearch index and provide a downloadable ZIP file.
     """
@@ -431,7 +431,7 @@ def backup_index():
 
 @api_bp.route('/backup-examples-index', methods=['GET'])
 @jwt_required()
-def backup_index():
+def backup_index_examples():
     """
     Backup Elasticsearch index and provide a downloadable ZIP file.
     """
